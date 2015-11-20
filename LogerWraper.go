@@ -209,7 +209,8 @@ func (f *_FILE) rename() {
 			t, _ := time.Parse(DATEFORMAT, time.Now().Format(DATEFORMAT))
 			f._date = &t
 			f.logObj.logfile, _ = os.Create(f.dir + "/" + f.filename)
-			f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+			//f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+			f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime)
 		}
 	} else {
 		f.coverNextOne()
@@ -230,7 +231,8 @@ func (f *_FILE) coverNextOne() {
 	}
 	os.Rename(f.dir+"/"+f.filename, f.dir+"/"+f.filename+"."+strconv.Itoa(int(f._suffix)))
 	f.logObj.logfile, _ = os.Create(f.dir + "/" + f.filename)
-	f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+	//f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime|log.Lshortfile)
+	f.lg = log.New(f.logObj.logfile, "\n", log.Ldate|log.Ltime)
 }
 
 func fileSize(file string) int64 {
