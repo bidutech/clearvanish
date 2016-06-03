@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+///////////////////////////////////////
+
 /**************调用顺序很重要，必须先创建实例
 mysqlloger.SetRollingDaily("/usr/local/test/golangLogertest", "test.log")
 mysqlloger.SetLevel(LogerWraper.ALL)
