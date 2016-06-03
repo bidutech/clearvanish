@@ -10,6 +10,43 @@
 ###4、注意问题：
            必须先调用 SetRollingDaily 或 SetRollingDaily 先创建实例才能再对日志进行设置各项Set操作
 ###4、example:
+* 配置文件方式（推荐）
+<pre><code>
+需要按照log.cfg模板进行配置
+
+logpath  日志存储路径
+
+其中debug  取值 0  不打印调用代码信息  非零 打印调用代码信息
+console  0  不在控制台打印 非零在控制台打印 日志信息
+type 1  按天分割  0 按文件大小分割
+level （0-6）的整数{
+
+	ALL LEVEL = iota //0
+	DEBUG
+	INFO
+	WARN
+	ERROR
+	FATAL
+	OFF //6
+}
+
+注意：所有值必须填写
+</code></pre>
+
+const (
+	LogConfigFile = "log.cfg"
+)
+
+var loger LogerWraper.LogerWraper
+
+func InitLog() {
+	logConfigFile := "logpath" + LogConfigFile
+	loger.InitLog(logConfigFile)
+	loger.Info("Loger ready")
+
+}
+
+* 原生方式麻烦（不推荐）
 {
 		
         var mysqlloger LogerWraper.LogerWraper

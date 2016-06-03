@@ -29,13 +29,13 @@ const (
 )
 
 const (
-	ALL LEVEL = iota
+	ALL LEVEL = iota //0
 	DEBUG
 	INFO
 	WARN
 	ERROR
 	FATAL
-	OFF
+	OFF //6
 )
 
 type LogerConfig struct {
@@ -275,7 +275,7 @@ func (l *LogerWraper) fileCheck() {
 func (l *LogerWraper) callerInfo() string {
 	callerInfos := ""
 	if l.dodebug {
-		funcname, filename, lines, ok := callerName(2) //设置为2 因为这是第二层调用
+		funcname, filename, lines, ok := callerName(2) //设置为3因为这是第二层调用
 		if ok {
 			callerInfos = fmt.Sprintf("%s %s %d ", funcname, filename, lines)
 		}

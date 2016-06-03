@@ -2,12 +2,26 @@ package example
 
 import (
 	//"github.com/donnie4w/go-logger/logger"
-	"./../LogerWraper"
 	"runtime"
 	"strconv"
 	"testing"
 	"time"
+
+	"./../LogerWraper"
 )
+
+const (
+	LogConfigFile = "log.cfg"
+)
+
+var loger LogerWraper.LogerWraper
+
+func InitLog() {
+	logConfigFile := "./" + LogConfigFile
+	loger.InitLog(logConfigFile)
+	loger.Info("Loger ready")
+
+}
 
 func testLogerWraper(i int) {
 	for {
