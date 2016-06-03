@@ -1,3 +1,6 @@
+##HTTP  proxy
+##### this  Is actually a http  proxy 
+
 ####vanish cache clear agnet
 please config the file servers.json  all data in one line ,end by '\n'
 ####build
