@@ -3,7 +3,7 @@ package loger
 import (
 	"clearvanish/config"
 
-	"github.com/LogerWraper"
+	"github.com/shanhai2015/LogerWraper"
 )
 
 const (
