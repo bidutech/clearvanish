@@ -11,7 +11,7 @@ cd ./clearvanish
 
 ###测试
 <pre><code>
-[root@bogon 桌面]# curl -G -d "spid=10002001&epgid=100106"  -H"Host:interface5.vooler.com" -H"Purge-ID:12" http://127.0.0.1:8000/
+[root@bogon 桌面]# curl -G -d "spid=10002001&epgid=100106"  -H"Host:interface5.v5.com" -H"Purge-ID:12" http://127.0.0.1:8000/
 
 
 
