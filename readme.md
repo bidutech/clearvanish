@@ -17,7 +17,7 @@ cd ./clearvanish
 
 [root@bogon 桌面]# nc -l -k -p 8003
 PURGE /?spid=10002001&epgid=100106 HTTP/1.1
-Host: interface5.vooler.com
+Host: interface5.v5.com
 User-Agent: curl/7.29.0
 Accept: */*
 Purge-Id: 12
