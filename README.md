@@ -1,8 +1,7 @@
 ##HTTP  proxy
-##### this  Is actually a http  proxy 
-
+##### this  Is actually a http  proxy 实质是http转发
 ####vanish cache clear agnet
-please config the file servers.json  all data in one line ,end by '\n'
+pease config the file servers.json  all data in one line ,end by '\n'
 ####build
 
 install the go runtime
