@@ -1,7 +1,8 @@
-##HTTP  proxy
-##### this  Is actually a http  proxy 实质是http转发
+###实质是http请求转发，可以修改header 信息
 ####vanish cache clear agnet
-pease config the file servers.json  all data in one line ,end by '\n'
+please config the file servers.json  all data in one line ,end by '\n'
+
+varnishiplist.txt  varnish ip list  ,one ip one line 
 ####build
 
 install the go runtime
@@ -14,7 +15,6 @@ cd ./clearvanish
 ###测试
 <pre><code>
 [root@bogon 桌面]# curl -G -d "spid=10002001&epgid=100106"  -H"Host:interface5.v5.com" -H"Purge-ID:12" http://127.0.0.1:8000/
-
 
 
 

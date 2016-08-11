@@ -60,7 +60,6 @@ func checkError(err error) int {
 }
 
 func Httpserver() {
-
 	r := mux.NewRouter()
 	controller.Handle(r)
 	localhost := fmt.Sprintf("%s:%d", config.VanishServer.Local.Host, config.VanishServer.Local.Port)

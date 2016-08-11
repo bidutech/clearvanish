@@ -13,9 +13,26 @@ import (
 	"net/http"
 	"time"
 	//"strconv"
+	"clearvanish/loger"
+	//"net/url"
+	"strings"
 
+	"sync"
+
+	"github.com/go-httpclient"
 	"github.com/gorilla/mux"
+	"github.com/shanhai2015/SHcommon"
 )
+
+const checkinterval = 5 * 60 //5 minute interval to check
+
+var requeststores map[string]int64
+var mutx sync.RWMutex
+
+func init() {
+	requeststores = make(map[string]int64)
+	go checkResult()
+}
 
 func Test_realClear(header *http.Header) {
 
@@ -49,8 +66,9 @@ func Test_realClear(header *http.Header) {
 	}
 
 }
-func request(host, url string, r *http.Request) {
 
+func request(host, url string, r *http.Request) {
+	loger.Loger.Info("Redirect:", url)
 	client := http.Client{
 		Transport: &http.Transport{
 			Dial: func(netw, addr string) (net.Conn, error) {
@@ -72,39 +90,111 @@ func request(host, url string, r *http.Request) {
 	response, err := client.Do(reqest)
 	if err == nil {
 		defer response.Body.Close()
-		if response.StatusCode == 200 {
-
-			body, _ := ioutil.ReadAll(response.Body)
-			bodystr := string(body)
-			fmt.Println(bodystr)
-		}
+		//if response.StatusCode == 200 {
+		body, _ := ioutil.ReadAll(response.Body)
+		bodystr := string(body)
+		bodystr = strings.Replace(bodystr, "\n", " ", -1)
+		loger.Loger.Info(fmt.Sprintf("Reponse: Url:%s,StatusCode:%d,ResponseBoby:%s", url, response.StatusCode, bodystr))
+		//}
 	} else {
-		fmt.Print("Time out\n")
+		loger.Loger.Error(fmt.Sprintf("Redirect: Url:%s,Error:%s", url, err.Error()))
 	}
 }
+
 func realClear(r *http.Request) {
 	var uri string
 	uri = r.RequestURI
-	fmt.Println("uri", uri)
+	n := strings.LastIndex(uri, "/")
+	if n > 0 {
+		uri = SHcommon.Substr(uri, n, len(uri))
+	}
 	host := r.Host
-	for _, server := range config.VanishServer.Servers {
-		//serverhost := fmt.Sprintf("%s:%d", server.Host, server.Port)
-		url := fmt.Sprintf("http://%s:%d%s", server.Host, server.Port, uri)
+	go recordRequest("id")
+	port := config.VanishServer.VanishPort
+	var url string
+	for _, varniship := range config.VarnishIpList.IpList {
+		if port == 80 || port == 0 {
+			url = fmt.Sprintf("http://%s%s", varniship, uri)
+		} else {
+			url = fmt.Sprintf("http://%s:%d%s", varniship, port, uri)
+		}
 		go request(host, url, r)
 	}
 
 }
 
 func PrintHeader(r *http.Request) {
-	fmt.Println("http.Request.Host---->", r.Host)
-	fmt.Println("http.Request.Method---->", r.Method)
+	url := r.URL.String()
+	host := r.Host
+	method := r.Method
+	var headerstr string
 	for k, v := range r.Header {
 		for _, vv := range v {
-			fmt.Println("http.Request.Header:", k, vv)
+			headerstr += fmt.Sprintf("%s:%s,", k, vv)
+		}
+	}
+	headerstr = SHcommon.Substr(headerstr, 0, len(headerstr)-1)
+	loger.Loger.Info("Request:", fmt.Sprintf("Host:%s,Method:%s,Url:%s,Header:%s", host, method, url, headerstr))
+}
+
+func TestReturnResult() {
+	returnResult("")
+}
+func returnResult(requestId string) {
+	transport := &httpclient.Transport{
+		ConnectTimeout:        10 * time.Second,
+		RequestTimeout:        10 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+	}
+	defer transport.Close()
+	client := &http.Client{Transport: transport}
+	req, _ := http.NewRequest("GET", config.VanishServer.ResultSendApi, nil)
+	resp, err := client.Do(req)
+	if err != nil {
+		loger.Loger.Error(err)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode == 200 {
+			//do some thing
+		} else {
+			body, _ := ioutil.ReadAll(resp.Body)
+			bodystr := string(body)
+			loger.Loger.Info(bodystr)
+		}
+	}
+
+}
+
+func respose() {
+	mutx.Lock()
+	defer mutx.Unlock()
+	now := time.Now().Unix()
+	if len(requeststores) > 0 {
+		for k, v := range requeststores {
+			if (now - v) >= checkinterval {
+				go returnResult(k)
+			}
 		}
 	}
 }
 
+func checkResult() {
+	timer := time.NewTicker(2 * time.Second)
+	for {
+		select {
+		case <-timer.C:
+			respose()
+		}
+	}
+}
+
+func recordRequest(rid string) {
+	mutx.Lock()
+	defer mutx.Unlock()
+	var questId string
+	requeststores[questId] = time.Now().Unix()
+
+}
 func vanaishclear(w http.ResponseWriter, r *http.Request) {
 	PrintHeader(r)
 	go realClear(r)
@@ -118,5 +208,6 @@ func vanaishclear(w http.ResponseWriter, r *http.Request) {
 }
 
 func Handle(r *mux.Router) {
-	r.HandleFunc("/", vanaishclear)
+	r.HandleFunc("/{path:.*}", vanaishclear)
+	//r.HandleFunc("/", vanaishclear)
 }

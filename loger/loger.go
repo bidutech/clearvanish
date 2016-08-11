@@ -1,9 +1,10 @@
 package loger
 
 import (
-	"clearvanish/config"
+	"fmt"
 
 	"github.com/shanhai2015/LogerWraper"
+	"github.com/shanhai2015/SHcommon"
 )
 
 const (
@@ -12,9 +13,12 @@ const (
 
 var Loger LogerWraper.LogerWraper
 
-func InitLog() {
-	logConfigFile := config.GetCurrentPath() + LogConfigFile
+func init() {
+	logConfigFile := SHcommon.GetCurrentPath() + LogConfigFile
 	Loger.InitLog(logConfigFile)
 	Loger.Info("Loger ready")
+}
 
+func ErrorLog(err error) {
+	Loger.Error(fmt.Sprintf("%v", err))
 }

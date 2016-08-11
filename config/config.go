@@ -7,14 +7,13 @@ date:2016.06.01
 
 import (
 	"bufio"
+	"clearvanish/loger"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
-	//"path"
-	"path/filepath"
-	"strings"
+
+	"github.com/shanhai2015/SHcommon"
 )
 
 type Host struct {
@@ -23,42 +22,56 @@ type Host struct {
 }
 
 type VanishServers struct {
-	Local   Host   `json:"local"` //127.0.0.1:8080
-	Servers []Host `json:"servers"`
+	Local         Host   `json:"local"` //127.0.0.1:8080
+	VanishPort    int    `json:"varnishport"`
+	ResultSendApi string `json:"resultsendapi"`
 }
 
 var VanishServer VanishServers
 
-const (
-	serversConfigPath = "servers.json"
-)
-
-func GetCurrentPath() string {
-	file, _ := exec.LookPath(os.Args[0])
-	path, _ := filepath.Abs(file)
-	path = string(path[0:(strings.LastIndex(path, "/") + 1)])
-	return path
+type Ip struct {
+	IpList []string
 }
 
-func InitConfigSrc(configpath string, conf interface{}) {
+var VarnishIpList Ip
+
+func (ip *Ip) IsIp(ipstr string) bool {
+
+	return SHcommon.IsIp(ipstr)
+}
+
+const (
+	serversConfigPath = "servers.json"
+	varnisiplist      = "varnishiplist.txt"
+)
+
+func init() {
+	VarnishIpList.IpList = []string{}
+	InitIpList()
+}
+func InitIpList() {
+
+	configpath := SHcommon.GetCurrentPath() + varnisiplist
 	f, err := os.Open(configpath)
 	defer f.Close()
 	if nil == err {
 		buff := bufio.NewReader(f)
 		for {
-			line, err := buff.ReadBytes('\n')
-			if err != nil || io.EOF == err {
-				return
+			line, _, err := buff.ReadLine()
+			if err == io.EOF {
+				break
 			}
-			errjson := json.Unmarshal(line, &conf)
-			if errjson != nil {
-				fmt.Printf("ERR InitConfig Configsr.DataPath:%s,line:%s\n", configpath, line)
-				os.Exit(-1)
+			if len(string(line)) == 0 {
+				continue
 			}
-			break
+			if VarnishIpList.IsIp(string(line)) {
+				VarnishIpList.IpList = append(VarnishIpList.IpList, string(line))
+			} else {
+				loger.Loger.Error("ERR Ip", string(line))
+			}
 		}
 	} else {
-		fmt.Printf("read config error-2")
+		loger.Loger.Error("Open iplist file Err")
 		os.Exit(-1)
 	}
 }
@@ -94,11 +107,8 @@ func PrintConfigInfo() {
 	}
 }
 func InitConfig() {
-
-	curentpath := GetCurrentPath()
-	serverspath := curentpath + serversConfigPath
+	serverspath := SHcommon.GetCurrentPath() + serversConfigPath
 	fmt.Println("serverspath", serverspath)
 	InitConfigServers(serverspath, &VanishServer)
 	//PrintConfigInfo()
-
 }
